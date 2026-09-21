@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowUpRight, Home } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 
 export function Navbar() {
   return (
@@ -16,6 +17,7 @@ export function Navbar() {
         </Link>
 
         <div className="flex items-center gap-2 sm:gap-4">
+          <LogoutButton />
           <Link
             href="/listings"
             className="rounded-full px-3 py-2 text-sm font-semibold text-ink transition hover:bg-white sm:px-4"
