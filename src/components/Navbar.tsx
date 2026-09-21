@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ArrowUpRight, House, ShieldCheck } from "lucide-react";
+import { LogoutButton } from "@/components/LogoutButton";
 import { buttonStyles } from "@/components/ui/Button";
 
 export function Navbar() {
@@ -29,6 +30,7 @@ export function Navbar() {
         </Link>
 
         <div className="flex items-center gap-1 sm:gap-3">
+          <LogoutButton />
           <Link
             href="/listings"
             aria-current={pathname.startsWith("/listings") ? "page" : undefined}
