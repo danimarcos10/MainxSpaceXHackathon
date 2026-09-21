@@ -4,6 +4,8 @@ import { useMemo, useState } from "react";
 import { SearchX } from "lucide-react";
 import { ListingCard } from "@/components/ListingCard";
 import { SearchFilters, type FilterValues } from "@/components/SearchFilters";
+import { Button } from "@/components/ui/Button";
+import { SectionHeading } from "@/components/ui/SectionHeading";
 import { getUserById, listings } from "@/lib/demo-data";
 import {
   filterListings,
@@ -62,22 +64,11 @@ export function ListingsMarketplace() {
 
   return (
     <>
-      <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-end">
-        <div>
-          <p className="text-sm font-bold tracking-[0.16em] text-brand uppercase">
-            Maastricht, Netherlands
-          </p>
-          <h1 className="mt-2 text-4xl font-bold tracking-[-0.045em] sm:text-5xl">
-            Rooms that match student life.
-          </h1>
-          <p className="mt-3 max-w-2xl text-lg text-muted">
-            Temporary, furnished stays from verified university students.
-          </p>
-        </div>
-        <p aria-live="polite" className="text-sm font-semibold text-muted">
-          {filteredListings.length} {filteredListings.length === 1 ? "room" : "rooms"} available
-        </p>
-      </div>
+      <SectionHeading
+        eyebrow="Maastricht, Netherlands"
+        title="Rooms that match student life."
+        description="Temporary stays from verified university students, with permission status made clear."
+      />
 
       <SearchFilters
         values={draftFilters}
@@ -92,30 +83,34 @@ export function ListingsMarketplace() {
       />
 
       {filteredListings.length > 0 ? (
-        <div className="mt-8 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-          {filteredListings.map((listing) => (
-            <ListingCard
-              key={listing.id}
-              listing={listing}
-              owner={getUserById(listing.ownerId)}
-            />
-          ))}
-        </div>
+        <>
+          <div className="mt-8 flex items-center justify-between border-b border-line pb-4">
+            <p aria-live="polite" className="text-sm font-bold text-ink">
+              {filteredListings.length} {filteredListings.length === 1 ? "room" : "rooms"}
+            </p>
+            <p className="text-xs font-semibold text-muted">Temporary stays · Maastricht</p>
+          </div>
+          <div className="mt-6 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+            {filteredListings.map((listing) => (
+              <ListingCard
+                key={listing.id}
+                listing={listing}
+                owner={getUserById(listing.ownerId)}
+              />
+            ))}
+          </div>
+        </>
       ) : (
-        <div className="mt-8 rounded-3xl border border-dashed border-line bg-white px-6 py-16 text-center">
+        <div className="mt-8 rounded-[1.5rem] border border-dashed border-line bg-white px-6 py-16 text-center">
           <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-brand-soft text-brand">
             <SearchX aria-hidden="true" size={22} />
           </span>
           <h2 className="mx-auto mt-5 max-w-lg text-xl font-bold">
             No rooms match those dates. Try changing your dates, budget or area.
           </h2>
-          <button
-            type="button"
-            onClick={resetFilters}
-            className="mt-6 rounded-full bg-ink px-5 py-2.5 text-sm font-bold text-white transition hover:bg-brand"
-          >
+          <Button type="button" onClick={resetFilters} variant="secondary" className="mt-6">
             Reset filters
-          </button>
+          </Button>
         </div>
       )}
     </>

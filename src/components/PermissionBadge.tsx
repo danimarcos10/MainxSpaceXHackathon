@@ -1,4 +1,5 @@
-import { CircleAlert, CircleCheck, Clock3 } from "lucide-react";
+import { CircleAlert, ShieldCheck, Clock3 } from "lucide-react";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import type { PermissionStatus } from "@/types";
 
 interface PermissionBadgeProps {
@@ -10,24 +11,27 @@ const badgeConfig = {
   unchecked: {
     label: "Not checked",
     icon: CircleAlert,
-    className: "bg-slate-100 text-slate-700",
+    tone: "neutral",
   },
   verified: {
-    label: "Permission checked",
-    icon: CircleCheck,
-    className: "bg-brand-soft text-brand-dark",
+    label: "Permission verified",
+    icon: ShieldCheck,
+    tone: "success",
   },
   pending: {
     label: "Check pending",
     icon: Clock3,
-    className: "bg-amber-50 text-amber-800",
+    tone: "warning",
   },
   permission_required: {
-    label: "Permission required",
+    label: "Landlord permission required",
     icon: CircleAlert,
-    className: "bg-amber-50 text-amber-800",
+    tone: "warning",
   },
-} as const;
+} satisfies Record<
+  PermissionStatus,
+  { label: string; icon: typeof CircleAlert; tone: BadgeTone }
+>;
 
 export function PermissionBadge({ status, showUnchecked = false }: PermissionBadgeProps) {
   if (status === "unchecked" && !showUnchecked) {
@@ -38,11 +42,9 @@ export function PermissionBadge({ status, showUnchecked = false }: PermissionBad
   const Icon = config.icon;
 
   return (
-    <span
-      className={`inline-flex items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold ${config.className}`}
-    >
+    <Badge tone={config.tone} compact>
       <Icon aria-hidden="true" size={14} />
       {config.label}
-    </span>
+    </Badge>
   );
 }

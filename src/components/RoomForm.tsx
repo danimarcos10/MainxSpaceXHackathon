@@ -7,10 +7,11 @@ import {
   ArrowLeft,
   ArrowRight,
   BadgeCheck,
+  CalendarDays,
   Check,
   CheckCircle2,
   FileCheck2,
-  FileText,
+  FileSearch,
   GraduationCap,
   Home,
   LoaderCircle,
@@ -21,39 +22,43 @@ import {
 } from "lucide-react";
 import { ContractCheckResult } from "@/components/ContractCheckResult";
 import { VerificationBadge } from "@/components/VerificationBadge";
+import { Badge } from "@/components/ui/Badge";
+import { Button } from "@/components/ui/Button";
+import { fieldControlStyles } from "@/components/ui/Field";
 import {
   checkContract,
   generateLandlordRequest,
   type ContractCheckResponse,
   type LandlordRequestResponse,
 } from "@/lib/ai";
+import { compressImage } from "@/lib/image-upload";
 import { createListingId, saveUserListing } from "@/lib/listing-storage";
 import type { Listing } from "@/types";
 
 const photoOptions = [
   {
-    label: "Bright bedroom",
-    url: "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1400&q=85",
+    label: "Room with a study desk",
+    url: "https://images.unsplash.com/photo-1721396104614-e71110629a2f?auto=format&fit=crop&w=1400&q=82",
   },
   {
-    label: "Modern bedroom",
-    url: "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=85",
+    label: "Simple dorm room",
+    url: "https://images.unsplash.com/photo-1572496973076-dc34056ceb87?auto=format&fit=crop&w=1400&q=82",
   },
   {
-    label: "Cosy bedroom",
-    url: "https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=1400&q=85",
+    label: "Small furnished bedroom",
+    url: "https://images.unsplash.com/photo-1652882860902-7c6b0f88ef23?auto=format&fit=crop&w=1400&q=82",
   },
 ];
 
 const steps = [
-  { number: 1, label: "Room details", icon: Home },
-  { number: 2, label: "Availability", icon: FileText },
-  { number: 3, label: "Student", icon: GraduationCap },
-  { number: 4, label: "Contract check", icon: ShieldCheck },
+  { number: 1, label: "Room", icon: Home },
+  { number: 2, label: "Dates", icon: CalendarDays },
+  { number: 3, label: "Verification", icon: GraduationCap },
+  { number: 4, label: "Contract", icon: ShieldCheck },
 ];
 
 const inputClassName =
-  "mt-2 w-full rounded-xl border border-line bg-canvas px-4 py-3 text-sm text-ink transition placeholder:text-muted/60 focus:border-brand focus:bg-white";
+  `${fieldControlStyles} font-medium`;
 
 export function RoomForm() {
   const [step, setStep] = useState(1);
@@ -77,9 +82,40 @@ export function RoomForm() {
   const [generating, setGenerating] = useState(false);
   const [approved, setApproved] = useState(false);
   const [publishedListing, setPublishedListing] = useState<Listing | null>(null);
+  const [photoFilename, setPhotoFilename] = useState<string | null>(null);
+  const [photoError, setPhotoError] = useState<string | null>(null);
+  const [compressingPhoto, setCompressingPhoto] = useState(false);
+  const [publishError, setPublishError] = useState<string | null>(null);
 
   function updateRoom(field: string, value: string | boolean) {
     setRoom((current) => ({ ...current, [field]: value }));
+  }
+
+  function selectDemoPhoto(url: string) {
+    updateRoom("image", url);
+    setPhotoFilename(null);
+    setPhotoError(null);
+  }
+
+  async function selectPhotoFile(file: File | undefined) {
+    if (!file) return;
+
+    setPhotoError(null);
+    setCompressingPhoto(true);
+
+    try {
+      const image = await compressImage(file);
+      updateRoom("image", image);
+      setPhotoFilename(file.name);
+    } catch (error) {
+      setPhotoError(
+        error instanceof Error
+          ? error.message
+          : "The photo could not be prepared. Please try another image.",
+      );
+    } finally {
+      setCompressingPhoto(false);
+    }
   }
 
   async function runContractCheck() {
@@ -138,6 +174,7 @@ export function RoomForm() {
   }
 
   function publishListing() {
+    setPublishError(null);
     const listing: Listing = {
       id: createListingId(room.title),
       ownerId: "daniel",
@@ -153,8 +190,14 @@ export function RoomForm() {
       published: true,
     };
 
-    saveUserListing(listing);
-    setPublishedListing(listing);
+    try {
+      saveUserListing(listing);
+      setPublishedListing(listing);
+    } catch {
+      setPublishError(
+        "This browser could not save the listing and photo. Free some browser storage or choose a demo photo, then retry.",
+      );
+    }
   }
 
   if (publishedListing) {
@@ -162,22 +205,22 @@ export function RoomForm() {
   }
 
   return (
-    <div className="grid overflow-hidden rounded-[2rem] border border-line bg-white shadow-xl shadow-ink/5 lg:grid-cols-[18rem_1fr]">
-      <aside className="bg-ink p-7 text-white sm:p-8">
-        <p className="text-sm font-bold tracking-[0.16em] text-[#8ed9bc] uppercase">
+    <div className="grid overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-xl shadow-ink/[0.05] lg:grid-cols-[18rem_1fr]">
+      <aside className="bg-ink p-5 text-white sm:p-7 lg:p-8">
+        <p className="text-xs font-bold tracking-[0.16em] text-[#A9D9C6] uppercase">
           List your room
         </p>
-        <h1 className="mt-3 text-2xl font-bold tracking-[-0.035em]">
+        <h1 className="mt-3 hidden text-2xl font-extrabold tracking-[-0.035em] text-balance lg:block">
           Four quick steps to a safer sublet.
         </h1>
-        <ol className="mt-8 grid grid-cols-4 gap-2 lg:grid-cols-1 lg:gap-3">
+        <ol className="mt-5 grid grid-cols-4 gap-2 lg:mt-8 lg:grid-cols-1 lg:gap-3">
           {steps.map(({ number, label, icon: Icon }) => {
             const complete = step > number;
             const active = step === number;
             return (
               <li
                 key={number}
-                className={`flex items-center gap-3 rounded-2xl p-2.5 transition lg:p-3 ${
+                className={`flex min-w-0 flex-col items-center gap-2 rounded-2xl p-2 transition lg:flex-row lg:gap-3 lg:p-3 ${
                   active ? "bg-white/10" : ""
                 }`}
               >
@@ -197,7 +240,8 @@ export function RoomForm() {
                   )}
                 </span>
                 <span
-                  className={`hidden text-sm font-semibold lg:block ${
+                  aria-current={active ? "step" : undefined}
+                  className={`max-w-full truncate text-[0.62rem] font-bold lg:text-sm ${
                     active || complete ? "text-white" : "text-white/45"
                   }`}
                 >
@@ -283,8 +327,9 @@ export function RoomForm() {
                   <button
                     key={String(value)}
                     type="button"
+                    aria-pressed={room.furnished === value}
                     onClick={() => updateRoom("furnished", value)}
-                    className={`rounded-full px-5 py-2.5 text-sm font-bold transition ${
+                    className={`rounded-[0.875rem] px-5 py-2.5 text-sm font-bold transition ${
                       room.furnished === value
                         ? "bg-brand text-white"
                         : "border border-line bg-white text-muted hover:text-ink"
@@ -297,16 +342,19 @@ export function RoomForm() {
             </fieldset>
 
             <fieldset className="mt-7">
-              <legend className="text-sm font-bold">Choose a demo photo</legend>
-              <div className="mt-3 grid grid-cols-3 gap-3">
+              <legend className="text-sm font-bold">Choose a cover photo</legend>
+              <p className="mt-1 text-sm text-muted">
+                Pick a realistic demo room or add one photo of your own.
+              </p>
+              <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                 {photoOptions.map((photo) => (
                   <button
                     key={photo.url}
                     type="button"
                     aria-label={photo.label}
                     aria-pressed={room.image === photo.url}
-                    onClick={() => updateRoom("image", photo.url)}
-                    className={`relative aspect-[4/3] overflow-hidden rounded-2xl border-2 transition ${
+                    onClick={() => selectDemoPhoto(photo.url)}
+                    className={`relative aspect-[4/3] overflow-hidden rounded-[1rem] border-2 transition ${
                       room.image === photo.url ? "border-brand" : "border-transparent"
                     }`}
                   >
@@ -324,7 +372,77 @@ export function RoomForm() {
                     )}
                   </button>
                 ))}
+                <label
+                  htmlFor="cover-photo"
+                  aria-label={photoFilename ? "Change uploaded cover photo" : "Upload your own photo"}
+                  className={`relative flex aspect-[4/3] cursor-pointer items-center justify-center overflow-hidden rounded-[1rem] border-2 transition ${
+                    photoFilename
+                      ? "border-brand"
+                      : "border-dashed border-brand/35 bg-brand-soft/45 hover:border-brand"
+                  }`}
+                >
+                  {photoFilename ? (
+                    <>
+                      <Image
+                        src={room.image}
+                        alt="Your uploaded cover photo"
+                        fill
+                        unoptimized
+                        sizes="(max-width: 640px) 50vw, 180px"
+                        className="object-cover"
+                      />
+                      <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-full bg-brand text-white">
+                        <Check aria-hidden="true" size={13} strokeWidth={3} />
+                      </span>
+                    </>
+                  ) : (
+                    <span className="flex flex-col items-center gap-2 px-2 text-center text-xs font-bold text-brand-dark">
+                      {compressingPhoto ? (
+                        <LoaderCircle aria-hidden="true" size={22} className="animate-spin" />
+                      ) : (
+                        <Upload aria-hidden="true" size={22} />
+                      )}
+                      {compressingPhoto ? "Preparing photo…" : "Upload your own"}
+                    </span>
+                  )}
+                </label>
               </div>
+              <input
+                id="cover-photo"
+                type="file"
+                accept=".jpg,.jpeg,.png,.webp,image/jpeg,image/png,image/webp"
+                disabled={compressingPhoto}
+                className="sr-only"
+                onChange={(event) => {
+                  const file = event.currentTarget.files?.[0];
+                  event.currentTarget.value = "";
+                  void selectPhotoFile(file);
+                }}
+              />
+              {photoFilename && (
+                <div className="mt-3 flex flex-col gap-2 rounded-2xl border border-brand/15 bg-brand-soft/45 px-4 py-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-bold">{photoFilename}</p>
+                    <p className="mt-0.5 text-xs text-muted">
+                      Compressed to WebP · stored only in this browser for the MVP
+                    </p>
+                  </div>
+                  <label
+                    htmlFor="cover-photo"
+                    className="shrink-0 cursor-pointer text-sm font-bold text-brand hover:text-brand-dark"
+                  >
+                    Change photo
+                  </label>
+                </div>
+              )}
+              {photoError && (
+                <p
+                  role="alert"
+                  className="mt-3 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+                >
+                  {photoError}
+                </p>
+              )}
             </fieldset>
 
             <StepFooter onBack={null} />
@@ -384,10 +502,15 @@ export function RoomForm() {
               title="Your student details"
               description="RoomRelay is a verified student-only community."
             />
-            <div className="mt-8 rounded-3xl border border-line bg-canvas p-6">
+            <div className="mt-8 overflow-hidden rounded-[1.25rem] border border-brand/15 bg-brand-soft/60">
+              <div className="flex items-center gap-2 border-b border-brand/10 px-6 py-3 text-xs font-bold text-brand-dark">
+                <ShieldCheck aria-hidden="true" size={15} />
+                Identity checkpoint complete
+              </div>
+              <div className="p-6">
               <div className="flex flex-col justify-between gap-5 sm:flex-row sm:items-center">
                 <div className="flex items-center gap-4">
-                  <span className="grid size-14 place-items-center rounded-full bg-ink text-xl font-bold text-white">
+                  <span className="grid size-14 place-items-center rounded-2xl bg-ink text-xl font-bold text-white">
                     D
                   </span>
                   <div>
@@ -400,8 +523,9 @@ export function RoomForm() {
                 </div>
                 <VerificationBadge />
               </div>
+              </div>
             </div>
-            <div className="mt-5 flex items-center gap-3 rounded-2xl bg-brand-soft p-4 text-sm font-semibold text-brand-dark">
+            <div className="mt-5 flex items-center gap-3 rounded-2xl border border-line bg-white p-4 text-sm font-semibold text-muted">
               <BadgeCheck aria-hidden="true" size={20} />
               Your university email and student status are verified.
             </div>
@@ -413,20 +537,29 @@ export function RoomForm() {
           <div>
             <StepHeading
               eyebrow="Step 4 of 4"
-              title="Before listing your room, let's check your rental agreement."
-              description="Our contract check highlights what you need before temporarily subletting."
+              title="Check your rental agreement"
+              description="AI finds the clauses, evidence and permission requirements that matter before you publish."
+            />
+
+            <ContractProgress
+              uploaded={Boolean(uploadedFile)}
+              analyzed={Boolean(contractResult)}
+              approved={approved}
             />
 
             {!contractResult && (
               <>
-                <div className="mt-8 rounded-3xl border-2 border-dashed border-line bg-canvas p-7 text-center">
-                  <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-white text-brand shadow-sm">
+                <div
+                  aria-busy={checking}
+                  className="mt-6 rounded-[1.25rem] border-2 border-dashed border-ai/20 bg-ai-soft/35 p-7 text-center"
+                >
+                  <span className="mx-auto grid size-12 place-items-center rounded-2xl bg-white text-ai shadow-sm">
                     <Upload aria-hidden="true" size={22} />
                   </span>
                   <p className="mt-4 font-bold">Upload rental agreement</p>
                   <p className="mt-1 text-sm text-muted">PDF up to 20 MB.</p>
                   <div className="mt-5 flex justify-center">
-                    <label className="cursor-pointer rounded-full border border-line bg-white px-5 py-2.5 text-sm font-bold transition hover:border-brand/30">
+                    <label className="cursor-pointer rounded-[0.875rem] border border-line bg-white px-5 py-2.5 text-sm font-bold transition hover:border-ai/30">
                       Choose PDF
                       <input
                         type="file"
@@ -440,31 +573,27 @@ export function RoomForm() {
                     </label>
                   </div>
                   {uploadedFile && (
-                    <p className="mt-4 inline-flex items-center gap-2 rounded-full bg-brand-soft px-3 py-1.5 text-sm font-semibold text-brand-dark">
+                    <p className="mt-4 inline-flex items-center gap-2 rounded-full border border-ai/10 bg-white px-3 py-1.5 text-sm font-semibold text-ai">
                       <FileCheck2 aria-hidden="true" size={16} />
                       {uploadedFile.name}
                     </p>
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  disabled={!uploadedFile || checking}
-                  onClick={runContractCheck}
-                  className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 font-bold text-white transition hover:bg-brand-dark disabled:cursor-not-allowed disabled:opacity-45"
-                >
-                  {checking ? (
-                    <>
-                      <LoaderCircle aria-hidden="true" size={18} className="animate-spin" />
-                      Analyzing your rental agreement...
-                    </>
-                  ) : (
-                    <>
-                      <Sparkles aria-hidden="true" size={18} />
-                      Check my contract
-                    </>
-                  )}
-                </button>
+                {checking ? (
+                  <AnalysisLoading filename={uploadedFile?.name ?? "Rental agreement.pdf"} />
+                ) : (
+                  <Button
+                    type="button"
+                    disabled={!uploadedFile}
+                    onClick={runContractCheck}
+                    size="lg"
+                    className="mt-6 w-full"
+                  >
+                    <Sparkles aria-hidden="true" size={18} />
+                    Check my contract
+                  </Button>
+                )}
 
                 {analysisError && (
                   <div
@@ -482,11 +611,13 @@ export function RoomForm() {
                 <ContractCheckResult result={contractResult} />
 
                 {!landlordRequest && (
-                  <button
+                  <Button
                     type="button"
                     disabled={generating}
                     onClick={runLandlordRequest}
-                    className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full bg-ink px-6 py-3.5 font-bold text-white transition hover:bg-brand disabled:opacity-50"
+                    variant="dark"
+                    size="lg"
+                    className="mt-5 w-full"
                   >
                     {generating ? (
                       <>
@@ -499,16 +630,23 @@ export function RoomForm() {
                         Generate landlord request
                       </>
                     )}
-                  </button>
+                  </Button>
                 )}
 
                 {landlordRequest && (
-                  <div className="mt-5 rounded-3xl border border-line bg-white p-5 shadow-sm sm:p-6">
-                    <div className="flex items-center gap-2 text-sm font-bold text-brand">
-                      <Sparkles aria-hidden="true" size={17} />
-                      Generated landlord email
+                  <div className="mt-5 overflow-hidden rounded-[1.25rem] border border-line bg-white shadow-sm">
+                    <div className="flex items-center justify-between border-b border-line bg-canvas px-5 py-4 sm:px-6">
+                      <div className="flex items-center gap-2 text-sm font-bold text-brand">
+                        <Mail aria-hidden="true" size={17} />
+                        Landlord request ready
+                      </div>
+                      <Badge tone="ai">
+                        <Sparkles aria-hidden="true" size={13} />
+                        AI drafted
+                      </Badge>
                     </div>
-                    <p className="mt-5 text-xs font-bold tracking-wide text-muted uppercase">
+                    <div className="p-5 sm:p-6">
+                    <p className="text-xs font-bold tracking-wide text-muted uppercase">
                       Subject
                     </p>
                     <p className="mt-1 font-bold">{landlordRequest.subject}</p>
@@ -517,44 +655,59 @@ export function RoomForm() {
                     </div>
 
                     {!approved ? (
-                      <button
+                      <Button
                         type="button"
                         onClick={() => setApproved(true)}
-                        className="mt-5 inline-flex w-full items-center justify-center gap-2 rounded-full border border-brand/25 bg-brand-soft px-6 py-3 font-bold text-brand-dark transition hover:bg-brand hover:text-white"
+                        variant="secondary"
+                        className="mt-5 w-full border-brand/25 bg-brand-soft text-brand-dark"
                       >
                         <CheckCircle2 aria-hidden="true" size={18} />
                         Simulate landlord approval
-                      </button>
+                      </Button>
                     ) : (
                       <div className="mt-5 flex items-center justify-center gap-2 rounded-2xl bg-brand-soft p-4 font-bold text-brand-dark">
                         <CheckCircle2 aria-hidden="true" size={20} />
                         Landlord permission verified
                       </div>
                     )}
+                    </div>
                   </div>
                 )}
 
                 {approved && (
-                  <button
-                    type="button"
-                    onClick={publishListing}
-                    className="mt-6 inline-flex w-full items-center justify-center gap-2 rounded-full bg-brand px-6 py-4 font-bold text-white shadow-lg shadow-brand/15 transition hover:bg-brand-dark"
-                  >
-                    Publish listing
-                    <ArrowRight aria-hidden="true" size={18} />
-                  </button>
+                  <>
+                    <Button
+                      type="button"
+                      onClick={publishListing}
+                      size="lg"
+                      className="mt-6 w-full"
+                    >
+                      Publish listing
+                      <ArrowRight aria-hidden="true" size={18} />
+                    </Button>
+                    {publishError && (
+                      <p
+                        role="alert"
+                        className="mt-4 rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-sm font-semibold text-red-700"
+                      >
+                        {publishError}
+                      </p>
+                    )}
+                  </>
                 )}
               </div>
             )}
 
-            <button
+            <Button
               type="button"
               onClick={() => setStep(3)}
-              className="mt-6 inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-ink"
+              variant="ghost"
+              size="sm"
+              className="mt-6 -ml-3"
             >
               <ArrowLeft aria-hidden="true" size={16} />
               Back
-            </button>
+            </Button>
           </div>
         )}
       </div>
@@ -571,8 +724,8 @@ interface StepHeadingProps {
 function StepHeading({ eyebrow, title, description }: StepHeadingProps) {
   return (
     <div>
-      <p className="text-sm font-bold tracking-[0.14em] text-brand uppercase">{eyebrow}</p>
-      <h2 className="mt-2 max-w-2xl text-3xl font-bold tracking-[-0.04em] sm:text-4xl">
+      <p className="text-xs font-bold tracking-[0.15em] text-brand uppercase">{eyebrow}</p>
+      <h2 className="mt-2 max-w-2xl text-3xl font-extrabold tracking-[-0.045em] text-balance sm:text-4xl">
         {title}
       </h2>
       <p className="mt-3 max-w-2xl leading-7 text-muted">{description}</p>
@@ -589,80 +742,182 @@ function StepFooter({ onBack, onNext }: StepFooterProps) {
   return (
     <div className="mt-8 flex items-center justify-between border-t border-line pt-6">
       {onBack ? (
-        <button
+        <Button
           type="button"
           onClick={onBack}
-          className="inline-flex items-center gap-2 text-sm font-semibold text-muted transition hover:text-ink"
+          variant="ghost"
+          size="sm"
+          className="-ml-3"
         >
           <ArrowLeft aria-hidden="true" size={16} />
           Back
-        </button>
+        </Button>
       ) : (
         <span />
       )}
-      <button
+      <Button
         type={onNext ? "button" : "submit"}
         onClick={onNext}
-        className="inline-flex items-center gap-2 rounded-full bg-brand px-6 py-3 text-sm font-bold text-white transition hover:bg-brand-dark"
       >
         Continue
         <ArrowRight aria-hidden="true" size={16} />
-      </button>
+      </Button>
+    </div>
+  );
+}
+
+function ContractProgress({
+  uploaded,
+  analyzed,
+  approved,
+}: {
+  uploaded: boolean;
+  analyzed: boolean;
+  approved: boolean;
+}) {
+  const items = [
+    { label: "Upload", complete: uploaded },
+    { label: "AI review", complete: analyzed },
+    { label: "Permission", complete: approved },
+    { label: "Publish", complete: false },
+  ];
+
+  return (
+    <ol className="mt-7 grid grid-cols-4 gap-2" aria-label="Contract and permission progress">
+      {items.map((item, index) => {
+        const active =
+          !item.complete && (index === 0 || items[index - 1]?.complete);
+        return (
+          <li key={item.label} className="min-w-0">
+            <div
+              className={`h-1 rounded-full ${
+                item.complete ? "bg-brand" : active ? "bg-ai" : "bg-line"
+              }`}
+            />
+            <p
+              className={`mt-2 truncate text-[0.65rem] font-bold ${
+                item.complete || active ? "text-ink" : "text-subtle"
+              }`}
+            >
+              {item.label}
+            </p>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
+function AnalysisLoading({ filename }: { filename: string }) {
+  return (
+    <div
+      role="status"
+      aria-live="polite"
+      className="mt-6 overflow-hidden rounded-[1.25rem] border border-ai/20 bg-ai-soft/55 p-6"
+    >
+      <div className="flex flex-col items-center text-center sm:flex-row sm:text-left">
+        <div className="relative grid h-24 w-20 shrink-0 place-items-center overflow-hidden rounded-xl border border-ai/20 bg-white text-ai shadow-sm">
+          <FileSearch aria-hidden="true" size={30} />
+          <span
+            aria-hidden="true"
+            className="contract-scan-line absolute inset-x-2 top-2 h-0.5 rounded-full bg-ai shadow-[0_0_12px_rgba(85,87,201,0.65)]"
+          />
+        </div>
+        <div className="mt-5 sm:ml-6 sm:mt-0">
+          <div className="flex items-center justify-center gap-2 sm:justify-start">
+            <LoaderCircle aria-hidden="true" size={17} className="animate-spin text-ai" />
+            <p className="font-extrabold">Analyzing your rental agreement</p>
+          </div>
+          <p className="mt-2 max-w-lg text-sm leading-6 text-muted">
+            Looking for subletting clauses, permission requirements and restrictions.
+            This can take a few seconds.
+          </p>
+          <p className="mt-3 truncate text-xs font-bold text-ai">{filename}</p>
+        </div>
+      </div>
     </div>
   );
 }
 
 function ListingSuccess({ listing }: { listing: Listing }) {
+  const dateFormatter = new Intl.DateTimeFormat("en-GB", {
+    day: "numeric",
+    month: "long",
+    year: "numeric",
+    timeZone: "UTC",
+  });
+  const dates = `${dateFormatter.format(
+    new Date(`${listing.startDate}T00:00:00Z`),
+  )} – ${dateFormatter.format(new Date(`${listing.endDate}T00:00:00Z`))}`;
+
   return (
-    <div className="overflow-hidden rounded-[2rem] border border-line bg-white shadow-xl shadow-ink/5">
-      <div className="bg-brand-soft px-6 py-10 text-center sm:px-10">
-        <span className="mx-auto grid size-14 place-items-center rounded-full bg-brand text-white">
+    <div className="overflow-hidden rounded-[1.75rem] border border-line bg-white shadow-xl shadow-ink/[0.05]">
+      <div className="relative overflow-hidden bg-brand-soft px-6 py-10 text-center sm:px-10 sm:py-12">
+        <div
+          aria-hidden="true"
+          className="absolute left-1/2 top-0 size-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/60 blur-3xl"
+        />
+        <span className="relative mx-auto grid size-14 place-items-center rounded-2xl bg-brand text-white shadow-lg shadow-brand/20">
           <Check aria-hidden="true" size={27} strokeWidth={3} />
         </span>
-        <p className="mt-5 text-sm font-bold tracking-[0.15em] text-brand uppercase">
-          Listing complete
+        <p className="relative mt-5 text-xs font-bold tracking-[0.15em] text-brand uppercase">
+          Published successfully
         </p>
-        <h1 className="mt-2 text-4xl font-bold tracking-[-0.045em]">
-          Your room is ready for RoomRelay
+        <h1 className="relative mt-2 text-4xl font-extrabold tracking-[-0.05em] text-balance">
+          Your room is ready to match
         </h1>
-        <p className="mx-auto mt-3 max-w-xl text-muted">
-          Daniel&apos;s room is published and ready to match with an incoming student.
+        <p className="relative mx-auto mt-3 max-w-xl text-muted">
+          The listing is live with its student identity, contract check and permission status.
         </p>
       </div>
 
       <div className="grid gap-8 p-6 sm:p-10 lg:grid-cols-[1fr_0.85fr]">
-        <div className="overflow-hidden rounded-3xl border border-line">
+        <div className="overflow-hidden rounded-[1.25rem] border border-line">
           <div className="relative aspect-[16/9]">
             <Image
               src={listing.image}
               alt={listing.title}
               fill
+              unoptimized={listing.image.startsWith("data:image/")}
               sizes="(max-width: 1024px) 100vw, 600px"
               className="object-cover"
             />
           </div>
           <div className="p-5">
+            <div className="flex flex-wrap gap-2">
+              <Badge tone="success">
+                <BadgeCheck aria-hidden="true" size={13} />
+                Verified student
+              </Badge>
+              <Badge tone="ai">
+                <Sparkles aria-hidden="true" size={13} />
+                AI checked
+              </Badge>
+            </div>
             <div className="flex items-start justify-between gap-4">
               <div>
-                <p className="text-xs font-bold tracking-[0.12em] text-brand uppercase">
+                <p className="mt-4 text-xs font-bold tracking-[0.12em] text-brand uppercase">
                   {listing.area}
                 </p>
-                <h2 className="mt-1 text-2xl font-bold">{listing.title}</h2>
+                <h2 className="mt-1 text-2xl font-extrabold">{listing.title}</h2>
               </div>
-              <p className="text-xl font-bold">
+              <p className="mt-4 text-xl font-extrabold">
                 €{listing.price}
-                <span className="text-xs font-normal text-muted"> / month</span>
+                <span className="text-xs font-medium text-muted"> / month</span>
               </p>
             </div>
-            <p className="mt-3 text-sm text-muted">
-              {listing.startDate} – {listing.endDate}
-            </p>
+            <p className="mt-3 text-sm font-semibold text-muted">{dates}</p>
           </div>
         </div>
 
         <div className="flex flex-col justify-center">
-          <h2 className="text-2xl font-bold tracking-tight">Ready to match</h2>
-          <ul className="mt-5 space-y-3">
+          <p className="text-xs font-bold tracking-[0.14em] text-brand uppercase">
+            Trust receipt
+          </p>
+          <h2 className="mt-2 text-2xl font-extrabold tracking-tight">
+            Everything checked for launch
+          </h2>
+          <ul className="mt-5 grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
             {[
               "Student verified",
               "Listing information",
@@ -671,7 +926,7 @@ function ListingSuccess({ listing }: { listing: Listing }) {
             ].map((item) => (
               <li
                 key={item}
-                className="flex items-center justify-between rounded-2xl bg-canvas px-4 py-3 text-sm font-bold"
+                className="flex items-center justify-between rounded-[0.875rem] border border-line bg-canvas px-4 py-3 text-sm font-bold"
               >
                 {item}
                 <CheckCircle2 aria-label="Complete" size={19} className="text-brand" />
@@ -680,7 +935,7 @@ function ListingSuccess({ listing }: { listing: Listing }) {
           </ul>
           <Link
             href="/listings"
-            className="mt-7 inline-flex items-center justify-center gap-2 rounded-full bg-brand px-6 py-3.5 font-bold text-white transition hover:bg-brand-dark"
+            className="mt-7 inline-flex h-12 items-center justify-center gap-2 rounded-[0.875rem] bg-brand px-6 text-sm font-bold text-white shadow-lg shadow-brand/15 transition hover:-translate-y-0.5 hover:bg-brand-dark"
           >
             View in marketplace
             <ArrowRight aria-hidden="true" size={18} />
@@ -688,7 +943,7 @@ function ListingSuccess({ listing }: { listing: Listing }) {
         </div>
       </div>
 
-      <p className="border-t border-line bg-ink px-6 py-5 text-center text-sm font-semibold text-white/85">
+      <p className="border-t border-line bg-ink px-6 py-5 text-center text-sm font-semibold leading-6 text-white/85">
         One student was paying for an empty room. Another couldn&apos;t find housing. RoomRelay
         matched them safely.
       </p>

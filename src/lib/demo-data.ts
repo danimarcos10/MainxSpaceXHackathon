@@ -93,7 +93,7 @@ export const listings: Listing[] = [
       "A calm, sun-filled room in a shared student apartment, a short walk from Maastricht station and the city centre. Fully furnished and ready for a four-month stay.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1721396104614-e71110629a2f?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -109,7 +109,7 @@ export const listings: Listing[] = [
       "Compact furnished studio close to the Faculty of Health, Medicine and Life Sciences, with excellent train and bus connections.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1572496973076-dc34056ceb87?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "pending",
     published: true,
   },
@@ -125,7 +125,7 @@ export const listings: Listing[] = [
       "Spacious room in a characterful townhouse, close to university buildings, cafés and the Markt. Shared kitchen with two other students.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1598928506311-c55ded91a20c?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1652882860902-7c6b0f88ef23?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -141,7 +141,7 @@ export const listings: Listing[] = [
       "Affordable furnished room in a friendly student house with a sunny shared garden and secure bicycle storage.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1560185008-b033106af5c3?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1737808773486-ca1065f37217?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "unchecked",
     published: true,
   },
@@ -157,7 +157,7 @@ export const listings: Listing[] = [
       "Light and peaceful room near green spaces, with a quick cycle to the city centre and a generous shared living area.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1540518614846-7eded433c457?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1665970602684-10764ae9c612?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "permission_required",
     published: true,
   },
@@ -173,7 +173,7 @@ export const listings: Listing[] = [
       "A bright top-floor room among the historic streets of Jekerkwartier, close to the university library and city park.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1753505888770-46be3b748b41?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -189,7 +189,7 @@ export const listings: Listing[] = [
       "A practical room near the shopping centre with direct buses to campus and plenty of space to bring your own furniture.",
     furnished: false,
     image:
-      "https://images.unsplash.com/photo-1502672260266-1c1ef2d93688?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1758060215425-303300b1c7e2?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -205,7 +205,7 @@ export const listings: Listing[] = [
       "Furnished room in a quiet shared home with a large garden, bike storage and a ten-minute cycle to the station.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1560185007-c5ca9d2c014d?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1722247520369-7f1495e79245?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "pending",
     published: true,
   },
@@ -221,7 +221,7 @@ export const listings: Listing[] = [
       "A clean, unfurnished room close to the Groene Loper, supermarkets and fast bus connections into the centre.",
     furnished: false,
     image:
-      "https://images.unsplash.com/photo-1560185127-6ed189bf02f4?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -237,7 +237,7 @@ export const listings: Listing[] = [
       "Comfortable room for the spring semester, close to Randwyck campus with a shared balcony and modern kitchen.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1484101403633-562f891dc89a?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1536376072261-38c75010e6c9?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -253,7 +253,7 @@ export const listings: Listing[] = [
       "A generous furnished room in a relaxed student house, with free parking and a straightforward cycle into town.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1554995207-c18c203602cb?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1455390582262-044cdead277a?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "unchecked",
     published: true,
   },
@@ -269,7 +269,7 @@ export const listings: Listing[] = [
       "A premium furnished loft room with high ceilings, a spacious shared living area and Maastricht station around the corner.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1505873242700-f289a29e1e0f?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1497366754035-f200968a6e72?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -285,7 +285,7 @@ export const listings: Listing[] = [
       "A bright furnished room ideal for a fall-semester exchange, near the university, hospital and train station.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1616594039964-ae9021a400a0?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1518005020951-eccb494ad742?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },
@@ -301,7 +301,7 @@ export const listings: Listing[] = [
       "A large furnished room with a private bathroom, steps from the Markt and within walking distance of university buildings.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1566665797739-1674de7a421a?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1493663284031-b7e3aefcae8e?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "permission_required",
     published: true,
   },
@@ -317,7 +317,7 @@ export const listings: Listing[] = [
       "A furnished room overlooking a quiet courtyard, two minutes from the university library and cafés along the Jeker.",
     furnished: true,
     image:
-      "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?auto=format&fit=crop&w=1400&q=85",
+      "https://images.unsplash.com/photo-1484154218962-a197022b5858?auto=format&fit=crop&w=1400&q=82",
     permissionStatus: "verified",
     published: true,
   },

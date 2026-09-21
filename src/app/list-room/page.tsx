@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function ListRoomPage() {
   return (
-    <div className="mx-auto max-w-6xl px-5 py-10 sm:px-8 sm:py-14">
+    <div className="mx-auto max-w-7xl px-5 py-10 sm:px-8 sm:py-14">
       <Link
         href="/"
         className="inline-flex items-center gap-2 text-sm font-semibold text-muted hover:text-ink"

@@ -6,141 +6,174 @@ import {
   Flag,
   ListChecks,
   Quote,
+  Sparkles,
 } from "lucide-react";
+import { Badge, type BadgeTone } from "@/components/ui/Badge";
 import type { ContractCheckResponse } from "@/lib/ai";
 
 interface ContractCheckResultProps {
   result: ContractCheckResponse;
 }
 
+const statusConfig = {
+  safe: {
+    label: "Contract appears to allow it",
+    icon: CheckCircle2,
+    tone: "success",
+    iconClassName: "bg-brand-soft text-brand",
+    borderClassName: "border-brand/20",
+  },
+  permission_required: {
+    label: "Landlord permission required",
+    icon: CircleAlert,
+    tone: "warning",
+    iconClassName: "bg-warning-soft text-warning",
+    borderClassName: "border-warning/20",
+  },
+  problem: {
+    label: "Contract restriction found",
+    icon: CircleX,
+    tone: "danger",
+    iconClassName: "bg-danger-soft text-danger",
+    borderClassName: "border-danger/20",
+  },
+  unclear: {
+    label: "Contract is unclear",
+    icon: CircleHelp,
+    tone: "neutral",
+    iconClassName: "bg-[#F0F2EF] text-muted",
+    borderClassName: "border-line",
+  },
+} satisfies Record<
+  ContractCheckResponse["status"],
+  {
+    label: string;
+    icon: typeof CheckCircle2;
+    tone: BadgeTone;
+    iconClassName: string;
+    borderClassName: string;
+  }
+>;
+
 export function ContractCheckResult({ result }: ContractCheckResultProps) {
-  const statusConfig = {
-    safe: {
-      label: "Contract appears to allow it",
-      icon: CheckCircle2,
-      panelClassName: "border-emerald-200 bg-emerald-50/70",
-      iconClassName: "bg-emerald-100 text-emerald-700",
-      accentClassName: "text-emerald-700",
-    },
-    permission_required: {
-      label: "Landlord permission required",
-      icon: CircleAlert,
-      panelClassName: "border-amber-200 bg-amber-50/70",
-      iconClassName: "bg-amber-100 text-amber-700",
-      accentClassName: "text-amber-700",
-    },
-    problem: {
-      label: "Contract restriction found",
-      icon: CircleX,
-      panelClassName: "border-red-200 bg-red-50/70",
-      iconClassName: "bg-red-100 text-red-700",
-      accentClassName: "text-red-700",
-    },
-    unclear: {
-      label: "Contract is unclear",
-      icon: CircleHelp,
-      panelClassName: "border-slate-200 bg-slate-50",
-      iconClassName: "bg-slate-200 text-slate-700",
-      accentClassName: "text-slate-700",
-    },
-  }[result.status];
-  const StatusIcon = statusConfig.icon;
+  const config = statusConfig[result.status];
+  const StatusIcon = config.icon;
 
   return (
-    <div
-      className={`rounded-3xl border p-5 sm:p-6 ${statusConfig.panelClassName}`}
+    <section
+      aria-label="AI contract analysis"
+      className={`overflow-hidden rounded-[1.5rem] border bg-white ${config.borderClassName}`}
     >
-      <div className="flex items-start gap-4">
-        <span
-          className={`grid size-11 shrink-0 place-items-center rounded-2xl ${statusConfig.iconClassName}`}
-        >
-          <StatusIcon aria-hidden="true" size={22} />
-        </span>
+      <div className="border-b border-line bg-raised p-5 sm:p-7">
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div className="flex items-start gap-4">
+            <span
+              className={`grid size-12 shrink-0 place-items-center rounded-2xl ${config.iconClassName}`}
+            >
+              <StatusIcon aria-hidden="true" size={23} />
+            </span>
+            <div>
+              <div className="flex flex-wrap gap-2">
+                <Badge tone={config.tone}>{config.label}</Badge>
+                <Badge tone="ai">
+                  <Sparkles aria-hidden="true" size={13} />
+                  AI contract checked
+                </Badge>
+              </div>
+              <h3 className="mt-4 text-2xl font-extrabold tracking-[-0.035em]">
+                {result.title}
+              </h3>
+            </div>
+          </div>
+          <div className="rounded-xl border border-line bg-white px-3 py-2 text-right">
+            <p className="text-[0.62rem] font-bold tracking-wide text-muted uppercase">
+              Confidence
+            </p>
+            <p className="mt-0.5 text-sm font-extrabold capitalize">{result.confidence}</p>
+          </div>
+        </div>
+        <p className="mt-5 max-w-3xl leading-7 text-muted">{result.summary}</p>
+      </div>
+
+      <div className="p-5 sm:p-7">
         <div>
-          <p
-            className={`text-xs font-bold tracking-[0.14em] uppercase ${statusConfig.accentClassName}`}
-          >
-            Status · {statusConfig.label}
+          <p className="flex items-center gap-2 text-xs font-bold tracking-[0.14em] text-ai uppercase">
+            <Quote aria-hidden="true" size={15} />
+            Evidence from your contract
           </p>
-          <h3 className="mt-1 text-xl font-bold">{result.title}</h3>
-          <p className="mt-2 leading-7 text-ink/70">{result.summary}</p>
+          {result.evidence.length > 0 ? (
+            <div className="mt-4 grid gap-3">
+              {result.evidence.map((item, index) => (
+                <figure
+                  key={`${item.quote}-${index}`}
+                  className="rounded-[1rem] border border-ai/12 bg-ai-soft/35 p-5"
+                >
+                  <blockquote className="text-[0.95rem] font-bold leading-7 text-ink">
+                    “{item.quote}”
+                  </blockquote>
+                  <figcaption className="mt-3 border-t border-ai/10 pt-3 text-sm leading-6 text-muted">
+                    {item.explanation}
+                  </figcaption>
+                </figure>
+              ))}
+            </div>
+          ) : (
+            <p className="mt-4 rounded-2xl bg-canvas p-4 text-sm leading-6 text-muted">
+              No clear supporting clause was found in the uploaded agreement.
+            </p>
+          )}
+        </div>
+
+        <div className="mt-6 grid gap-4 sm:grid-cols-2">
+          <div className="rounded-[1rem] border border-warning/15 bg-warning-soft/55 p-5">
+            <p className="flex items-center gap-2 text-sm font-extrabold text-warning">
+              <Flag aria-hidden="true" size={16} />
+              Important conditions
+            </p>
+            <BulletList items={result.flags} />
+          </div>
+          <div className="rounded-[1rem] border border-line bg-canvas p-5">
+            <p className="flex items-center gap-2 text-sm font-extrabold">
+              <ListChecks aria-hidden="true" size={16} className="text-brand" />
+              Recommended actions
+            </p>
+            {result.nextSteps.length > 0 ? (
+              <ol className="mt-4 space-y-3">
+                {result.nextSteps.map((item, index) => (
+                  <li key={item} className="flex gap-3 text-sm leading-6 text-muted">
+                    <span className="grid size-6 shrink-0 place-items-center rounded-lg bg-white text-[0.65rem] font-extrabold text-brand shadow-sm">
+                      {index + 1}
+                    </span>
+                    {item}
+                  </li>
+                ))}
+              </ol>
+            ) : (
+              <p className="mt-3 text-sm text-muted">No specific actions identified.</p>
+            )}
+          </div>
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-white/85 p-4 sm:p-5">
-        <p className="flex items-center gap-2 text-sm font-bold tracking-wide uppercase">
-          <Quote aria-hidden="true" size={16} className={statusConfig.accentClassName} />
-          Evidence from your contract
-        </p>
-        {result.evidence.length > 0 ? (
-          <div className="mt-4 space-y-4">
-            {result.evidence.map((item, index) => (
-              <div key={`${item.quote}-${index}`} className="border-l-2 border-line pl-4">
-                <blockquote className="text-sm font-semibold leading-6 text-ink">
-                  “{item.quote}”
-                </blockquote>
-                <p className="mt-1.5 text-sm leading-6 text-muted">
-                  {item.explanation}
-                </p>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <p className="mt-3 text-sm leading-6 text-muted">
-            No clear supporting clause was found in the uploaded agreement.
-          </p>
-        )}
-      </div>
-
-      <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <ResultList icon={Flag} title="Flags" items={result.flags} />
-        <ResultList icon={ListChecks} title="Next steps" items={result.nextSteps} />
-      </div>
-
-      <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-ink/10 pt-5">
-        <p className="text-sm font-bold">
-          Confidence:{" "}
-          <span className={`capitalize ${statusConfig.accentClassName}`}>
-            {result.confidence}
-          </span>
-        </p>
-        <p className="max-w-2xl text-xs leading-5 text-muted">
-          RoomRelay analyses the uploaded agreement and does not provide legal advice.
-          Always confirm requirements with your landlord or appropriate housing authority.
-        </p>
-      </div>
-    </div>
+      <p className="border-t border-line bg-canvas px-5 py-4 text-xs leading-5 text-muted sm:px-7">
+        RoomRelay analyses the uploaded agreement and does not provide legal advice. Always
+        confirm requirements with your landlord or appropriate housing authority.
+      </p>
+    </section>
   );
 }
 
-interface ResultListProps {
-  icon: typeof Flag;
-  title: string;
-  items: string[];
-}
-
-function ResultList({ icon: Icon, title, items }: ResultListProps) {
-  return (
-    <div className="rounded-2xl bg-white/80 p-4">
-      <p className="flex items-center gap-2 text-sm font-bold">
-        <Icon aria-hidden="true" size={16} className="text-amber-700" />
-        {title}
-      </p>
-      {items.length > 0 ? (
-        <ul className="mt-3 space-y-2">
-          {items.map((item) => (
-            <li key={item} className="flex gap-2 text-sm leading-5 text-muted">
-              <span
-                aria-hidden="true"
-                className="mt-2 size-1.5 shrink-0 rounded-full bg-brand"
-              />
-              {item}
-            </li>
-          ))}
-        </ul>
-      ) : (
-        <p className="mt-3 text-sm text-muted">None identified.</p>
-      )}
-    </div>
+function BulletList({ items }: { items: string[] }) {
+  return items.length > 0 ? (
+    <ul className="mt-4 space-y-2.5">
+      {items.map((item) => (
+        <li key={item} className="flex gap-2.5 text-sm leading-6 text-muted">
+          <span aria-hidden="true" className="mt-2.5 size-1.5 shrink-0 rounded-full bg-warning" />
+          {item}
+        </li>
+      ))}
+    </ul>
+  ) : (
+    <p className="mt-3 text-sm text-muted">None identified.</p>
   );
 }
